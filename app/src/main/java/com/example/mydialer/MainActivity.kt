@@ -12,6 +12,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
 import java.io.IOException
+import android.text.Editable
+import android.text.TextWatcher
 
 data class Contact(
     val name: String,
@@ -40,19 +42,30 @@ class MainActivity : AppCompatActivity() {
 
         loadContacts("https://drive.google.com/uc?export=download&id=1-KO-9GA3NzSgIc1dkAsNm8Dqw0fuPxcR")
 
-        findViewById<Button>(R.id.btn_search).setOnClickListener {
-            val searchText = searchEditText.text.toString()
-            Timber.d("Searching for: $searchText")
 
-            if (searchText.isEmpty()) {
-                contactAdapter.updateContacts(contactsList)
-            } else {
-                val filteredContacts = contactsList.filter { contact ->
-                    contact.name.contains(searchText, ignoreCase = true)
-                }
-                contactAdapter.updateContacts(filteredContacts)
+        searchEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Не нужно ничего делать здесь
             }
-        }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Фильтрация контактов при каждом изменении текста
+                val searchText = s.toString()
+                Timber.d("Filtering for: $searchText")
+                if (searchText.isEmpty()) {
+                    contactAdapter.updateContacts(contactsList)
+                } else {
+                    val filteredContacts = contactsList.filter { contact ->
+                        contact.name.contains(searchText, ignoreCase = true)
+                    }
+                    contactAdapter.updateContacts(filteredContacts)
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // Не нужно ничего делать здесь
+            }
+        })
     }
 
     private fun loadContacts(url: String) {
