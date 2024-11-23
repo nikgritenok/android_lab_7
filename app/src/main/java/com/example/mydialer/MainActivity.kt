@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.rView)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
-        contactAdapter = ContactAdapter(emptyList())
+        contactAdapter = ContactAdapter()
         recyclerView.adapter = contactAdapter
 
         loadContacts("https://drive.google.com/uc?export=download&id=1-KO-9GA3NzSgIc1dkAsNm8Dqw0fuPxcR")
@@ -49,16 +49,15 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Фильтрация контактов при каждом изменении текста
                 val searchText = s.toString()
                 Timber.d("Filtering for: $searchText")
                 if (searchText.isEmpty()) {
-                    contactAdapter.updateContacts(contactsList)
+                    contactAdapter.submitList(contactsList)  // Обновляем весь список
                 } else {
                     val filteredContacts = contactsList.filter { contact ->
                         contact.name.contains(searchText, ignoreCase = true)
                     }
-                    contactAdapter.updateContacts(filteredContacts)
+                    contactAdapter.submitList(filteredContacts)  // Обновляем только отфильтрованные данные
                 }
             }
 
@@ -79,7 +78,7 @@ class MainActivity : AppCompatActivity() {
                         val contacts = parseContacts(json)
                         runOnUiThread {
                             contactsList = contacts
-                            contactAdapter.updateContacts(contactsList)
+                            contactAdapter.submitList(contactsList)
                         }
                     }
                 } else {
